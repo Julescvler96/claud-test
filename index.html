@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Questionnaire perso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..700&family=Figtree:wght@400..700&display=swap">
+<style>
+/* Layout: one 640px column. A short intro, then one bordered card per question.
+   An owner-only "Réponses" tab appears above the form. */
+:root {
+  --bg: #EDF0EF;
+  --surface: #FBFCFB;
+  --field: #FFFFFF;
+  --soft: #EAF0EE;
+  --ink: #16201E;
+  --muted: #56646A;
+  --line: #CBD5D3;
+  --accent: #B3205A;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #F8E3EC;
+  --seg-low: #6F9BD0;
+  --seg-ok: #4B9F74;
+  --seg-over: #D9A33A;
+  --seg-obese: #D4624B;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101416;
+    --surface: #181E21;
+    --field: #11171A;
+    --soft: #1F282B;
+    --ink: #E9EFED;
+    --muted: #9BA9AD;
+    --line: #2D393D;
+    --accent: #FF7BAA;
+    --accent-ink: #2A0A18;
+    --accent-soft: #3B1B2A;
+    --seg-low: #7BA4D6;
+    --seg-ok: #56B185;
+    --seg-over: #DDAA45;
+    --seg-obese: #E27A64;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101416;
+  --surface: #181E21;
+  --field: #11171A;
+  --soft: #1F282B;
+  --ink: #E9EFED;
+  --muted: #9BA9AD;
+  --line: #2D393D;
+  --accent: #FF7BAA;
+  --accent-ink: #2A0A18;
+  --accent-soft: #3B1B2A;
+  --seg-low: #7BA4D6;
+  --seg-ok: #56B185;
+  --seg-over: #DDAA45;
+  --seg-obese: #E27A64;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.5 var(--font-body);
+  padding-block: 32px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.wrap { max-width: 640px; margin: 0 auto; display: grid; gap: 16px; }
+.wrap > * { min-width: 0; }
+
+/* intro */
+.intro { display: grid; gap: 6px; margin-bottom: 8px; }
+.kicker { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font: 650 clamp(36px, 9vw, 52px)/1.02 var(--font-display); letter-spacing: -.02em; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); font-size: 17px; }
+
+/* cards + questions */
+#form { display: grid; gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; min-width: 0; }
+.q { display: grid; gap: 14px; }
+.q-head { display: grid; gap: 4px; }
+.q-kicker { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.q-title { margin: 0; font: 600 20px/1.25 var(--font-display); text-wrap: balance; }
+.muted { color: var(--muted); }
+
+/* controls */
+.ctl { display: block; width: 100%; padding: 11px 13px; font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 10px; }
+.ctl::placeholder { color: var(--muted); opacity: .75; }
+.ctl:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+textarea.ctl { resize: vertical; min-height: 112px; }
+.short { max-width: 240px; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.field { display: grid; gap: 6px; }
+.field-label { font-size: 14px; font-weight: 600; color: var(--muted); }
+.adorned { position: relative; display: block; }
+.adorned .ctl { padding-right: 48px; }
+.unit { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none; }
+
+.btn { font: 600 16px/1 var(--font-body); padding: 14px 22px; border-radius: 10px; border: 0; background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+.btn:hover { filter: brightness(1.07); }
+.btn[disabled] { opacity: .6; cursor: default; }
+.btn-ghost { justify-self: start; font: 600 15px/1 var(--font-body); padding: 12px 16px; border-radius: 10px; border: 1px dashed var(--line); background: transparent; color: var(--accent); cursor: pointer; }
+.btn-ghost:hover { background: var(--accent-soft); }
+/* parcours question par question */
+.steps-bar { height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.steps-bar span { display: block; height: 100%; width: 9%; border-radius: 99px; background: var(--accent); transition: width .25s ease; }
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.nav .btn { margin-left: auto; }
+.btn-line { font: 600 16px/1 var(--font-body); padding: 14px 20px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+.btn-line:hover { border-color: var(--muted); }
+.nav-hint { margin: 0; min-height: 1.5em; font-size: 14px; color: var(--muted); text-align: right; }
+
+/* radio options */
+.opts { display: grid; gap: 8px; }
+.opt { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; background: var(--field); border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.opt:hover { border-color: var(--muted); }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.opt input { flex: 0 0 auto; width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--accent); }
+.opt-body { display: grid; gap: 2px; min-width: 0; }
+.opt-text { overflow-wrap: anywhere; }
+.opt-hint { font-size: 14px; font-style: italic; color: var(--muted); }
+
+/* languages */
+.langs { display: grid; gap: 10px; }
+.lang-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.lang-row .ctl { flex: 1 1 150px; width: auto; min-width: 0; }
+.lang-row .lvl { flex: 0 0 104px; }
+.lang-row .other { flex: 1 1 100%; }
+.icon-btn { flex: 0 0 auto; width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--line); background: var(--field); color: var(--muted); font-size: 22px; line-height: 1; cursor: pointer; }
+.icon-btn:hover { color: var(--accent); border-color: var(--accent); }
+.levels-hint { margin: 0; font-size: 13px; color: var(--muted); }
+
+/* BMI */
+.bmi { padding: 16px; background: var(--soft); border-radius: 10px; }
+.bmi p { margin: 0; }
+.bmi-empty { color: var(--muted); font-size: 15px; }
+.bmi-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.bmi-label { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.bmi-val { font: 650 40px/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.chip { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--field); font-size: 14px; font-weight: 600; }
+.chip::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--tone, var(--muted)); }
+.chip[data-tone="low"] { --tone: var(--seg-low); }
+.chip[data-tone="ok"] { --tone: var(--seg-ok); }
+.chip[data-tone="over"] { --tone: var(--seg-over); }
+.chip[data-tone="obese"] { --tone: var(--seg-obese); }
+.bmi-calc { margin-top: 10px !important; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.gauge { position: relative; margin-top: 18px; }
+.gauge-bar { display: flex; gap: 2px; height: 10px; border-radius: 99px; overflow: hidden; }
+.gauge-bar span { display: block; height: 100%; }
+.seg-1 { flex: 3.5; background: var(--seg-low); }
+.seg-2 { flex: 6.5; background: var(--seg-ok); }
+.seg-3 { flex: 5; background: var(--seg-over); }
+.seg-4 { flex: 10; background: var(--seg-obese); }
+.gauge-mark { position: absolute; top: -4px; left: 0; width: 4px; height: 18px; border-radius: 2px; background: var(--ink); transform: translateX(-50%); transition: left .25s ease; }
+.gauge-ticks { position: relative; height: 18px; margin-top: 8px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.gauge-ticks span { position: absolute; transform: translateX(-50%); }
+
+/* done + results */
+.done { display: grid; gap: 12px; }
+.done p { margin: 0; }
+.done textarea { min-height: 150px; }
+.done-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 420px) {
+  .card { padding: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gauge-mark, .steps-bar span { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="intro">
+    <p class="kicker">12 questions</p>
+    <h1>Questionnaire</h1>
+    <p class="lede">Une question à la fois. Toutes les réponses sont obligatoires pour passer à la suivante.</p>
+  </header>
+
+  <main id="view-form">
+    <form id="form" novalidate autocomplete="off">
+      <div class="steps-bar" aria-hidden="true"><span id="steps-fill"></span></div>
+
+      <section class="card q" aria-labelledby="q0-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 1</p>
+          <h2 class="q-title" id="q0-t">Quel est ton prénom ?</h2>
+        </div>
+        <input class="ctl short" id="prenom" type="text" maxlength="40" autocomplete="given-name" placeholder="Ton prénom" aria-labelledby="q0-t">
+      </section>
+
+      <section class="card q" aria-labelledby="q1-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 1</p>
+          <h2 class="q-title" id="q1-t">Quel âge as-tu ?</h2>
+        </div>
+        <input class="ctl short" id="age" type="text" inputmode="numeric" maxlength="40" placeholder="Ta réponse" aria-labelledby="q1-t">
+      </section>
+
+      <section class="card q" aria-labelledby="q2-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 2</p>
+          <h2 class="q-title" id="q2-t">Quelle est ta taille et ton poids ?</h2>
+        </div>
+        <div class="pair">
+          <label class="field" for="taille">
+            <span class="field-label">Taille</span>
+            <span class="adorned"><input class="ctl" id="taille" type="text" inputmode="decimal" maxlength="10" placeholder="ex. 168"><span class="unit">cm</span></span>
+          </label>
+          <label class="field" for="poids">
+            <span class="field-label">Poids</span>
+            <span class="adorned"><input class="ctl" id="poids" type="text" inputmode="decimal" maxlength="10" placeholder="ex. 58"><span class="unit">kg</span></span>
+          </label>
+        </div>
+        <div class="bmi" aria-live="polite">
+          <p class="bmi-empty" id="bmi-empty">Indique ta taille et ton poids : l’IMC se calcule tout seul.</p>
+          <div id="bmi-res" hidden>
+            <div class="bmi-top">
+              <span class="bmi-label">IMC</span>
+              <span class="bmi-val" id="bmi-val"></span>
+              <span class="chip" id="bmi-cat"></span>
+            </div>
+            <p class="bmi-calc" id="bmi-calc"></p>
+            <div class="gauge" aria-hidden="true">
+              <div class="gauge-bar"><span class="seg-1"></span><span class="seg-2"></span><span class="seg-3"></span><span class="seg-4"></span></div>
+              <span class="gauge-mark" id="gauge-mark"></span>
+              <div class="gauge-ticks"><span style="left:14%">18,5</span><span style="left:40%">25</span><span style="left:60%">30</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card q" aria-labelledby="q3-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 3</p>
+          <h2 class="q-title" id="q3-t">Quelles langues parles-tu ?</h2>
+        </div>
+        <div class="langs" id="langs"></div>
+        <button type="button" class="btn-ghost" id="add-lang">+ Ajouter une langue</button>
+        <p class="levels-hint">A1 découverte · A2 intermédiaire · B1 seuil · B2 avancé · C1 autonome · C2 maîtrise</p>
+      </section>
+
+      <section class="card q" aria-labelledby="q4-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 4</p>
+          <h2 class="q-title" id="q4-t">As-tu des tatouages, et si oui, combien ?</h2>
+        </div>
+        <div class="opts" role="radiogroup" aria-labelledby="q4-t">
+          <label class="opt"><input type="radio" name="tatouages" id="tatouages-non" value="non"><span class="opt-body"><span class="opt-text">Non</span></span></label>
+          <label class="opt"><input type="radio" name="tatouages" id="tatouages-oui" value="oui"><span class="opt-body"><span class="opt-text">Oui</span></span></label>
+        </div>
+        <label class="field" id="tat-wrap" for="tat-count" hidden>
+          <span class="field-label">Combien ?</span>
+          <input class="ctl short" id="tat-count" type="text" inputmode="numeric" maxlength="3" placeholder="ex. 3">
+        </label>
+      </section>
+
+      <section class="card q" aria-labelledby="q5-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 5</p>
+          <h2 class="q-title" id="q5-t">Bodycount ?</h2>
+        </div>
+        <div class="opts" role="radiogroup" aria-labelledby="q5-t" data-choice="bodycount"></div>
+      </section>
+
+      <section class="card q" aria-labelledby="q6-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 6</p>
+          <h2 class="q-title" id="q6-t">As-tu pour projet de te marier ?</h2>
+        </div>
+        <div class="opts" role="radiogroup" aria-labelledby="q6-t" data-choice="mariage"></div>
+      </section>
+
+      <section class="card q" aria-labelledby="q7-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 7</p>
+          <h2 class="q-title" id="q7-t">Politiquement, tu es :</h2>
+        </div>
+        <div class="opts" role="radiogroup" aria-labelledby="q7-t" data-choice="politique"></div>
+      </section>
+
+      <section class="card q" aria-labelledby="q8-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 8</p>
+          <h2 class="q-title" id="q8-t">Quelles sont tes passions / hobbies ?</h2>
+        </div>
+        <textarea class="ctl" id="hobbies" rows="4" maxlength="2000" placeholder="Ta réponse" aria-labelledby="q8-t"></textarea>
+      </section>
+
+      <section class="card q" aria-labelledby="q9-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 9</p>
+          <h2 class="q-title" id="q9-t">Est-ce que tu fumes ?</h2>
+        </div>
+        <div class="opts" role="radiogroup" aria-labelledby="q9-t" data-choice="tabac"></div>
+      </section>
+
+      <section class="card q" aria-labelledby="q10-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 10</p>
+          <h2 class="q-title" id="q10-t">Est-ce que tu bois ?</h2>
+        </div>
+        <div class="opts" role="radiogroup" aria-labelledby="q10-t" data-choice="alcool"></div>
+      </section>
+
+      <section class="card q" aria-labelledby="q11-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 11</p>
+          <h2 class="q-title" id="q11-t">Es-tu vegan / végétarienne ?</h2>
+        </div>
+        <div class="opts" role="radiogroup" aria-labelledby="q11-t" data-choice="vegan"></div>
+      </section>
+
+      <div class="nav">
+        <button type="button" class="btn-line" id="back" hidden>Retour</button>
+        <button type="button" class="btn" id="next" disabled>Suivant</button>
+      </div>
+      <p class="nav-hint" id="nav-hint" aria-live="polite"></p>
+    </form>
+
+    <section class="card done" id="done" hidden></section>
+  </main>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var FORM_ENDPOINT = 'https://formsubmit.co/ajax/jules.cuvelier96@gmail.com';
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var fr = function (n, o) { return n.toLocaleString('fr-FR', o); };
+  var fr1 = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
+
+  function el(tag, props) {
+    var n = document.createElement(tag);
+    Object.keys(props || {}).forEach(function (k) {
+      var v = props[k];
+      if (k === 'class') n.className = v;
+      else if (k === 'text') n.textContent = v;
+      else if (k.indexOf('on') === 0) n.addEventListener(k.slice(2), v);
+      else if (v === true) n.setAttribute(k, '');
+      else if (v !== false && v != null) n.setAttribute(k, v);
+    });
+    Array.prototype.slice.call(arguments, 2).forEach(function add(c) {
+      if (c == null || c === false) return;
+      if (Array.isArray(c)) { c.forEach(add); return; }
+      n.append(c.nodeType ? c : document.createTextNode(c));
+    });
+    return n;
+  }
+
+  /* ---------- données des questions ---------- */
+  var CHOICES = {
+    bodycount: [
+      ['0', '0'],
+      ['1-5', 'Entre 1 et 5'],
+      ['6-10', 'Entre 6 et 10'],
+      ['11-15', 'Entre 11 et 15'],
+      ['16-20', 'Entre 16 et 20'],
+      ['20+', 'Au-dessus de 20'],
+      ['nsp', 'Ne souhaite pas se prononcer', 'Tu as quelque chose à te reprocher ma grande ?']
+    ],
+    mariage: [
+      ['oui', 'Oui'],
+      ['non', 'Non'],
+      ['nsp', 'Je ne sais pas encore']
+    ],
+    politique: [
+      ['gauche', 'De gauche'],
+      ['droite', 'De droite'],
+      ['scam', 'La politique est un SCAM qui n’a pour seul but de diviser la population. Aucun parti politique ne va changer ta misérable vie de merde, seules tes propres actions ont une réelle importance sur la personne que tu es et que tu souhaites devenir.']
+    ],
+    tabac: [
+      ['non', 'Non'],
+      ['rare', 'Extrêmement rarement : 1 ou 2 clopes en soirée'],
+      ['oui', 'Oui']
+    ],
+    alcool: [
+      ['non', 'Non'],
+      ['rare', 'Très rarement'],
+      ['bourree', 'Ça m’arrive de me bourrer la gueule'],
+      ['hebdo', 'Je bois toutes les semaines']
+    ],
+    vegan: [
+      ['oui', 'Oui, je suis gay'],
+      ['non', 'Non, je suis normal']
+    ]
+  };
+  var TITLES = {
+    prenom: 'Prénom',
+    age: 'Âge',
+    mensurations: 'Taille, poids, IMC',
+    langues: 'Langues parlées',
+    tatouages: 'Tatouages',
+    bodycount: 'Bodycount',
+    mariage: 'Projet de mariage',
+    politique: 'Politiquement',
+    hobbies: 'Passions / hobbies',
+    tabac: 'Fume',
+    alcool: 'Boit',
+    vegan: 'Vegan / végétarienne'
+  };
+  var KEYS = ['prenom', 'age','mensurations', 'langues', 'tatouages', 'bodycount', 'mariage', 'politique', 'hobbies', 'tabac', 'alcool', 'vegan'];
+  var CHOICE_KEYS = ['bodycount', 'mariage', 'politique', 'tabac', 'alcool', 'vegan'];
+  var LANGS = ['Français', 'Anglais', 'Espagnol', 'Allemand', 'Italien', 'Portugais', 'Arabe', 'Néerlandais', 'Russe', 'Chinois', 'Japonais'];
+  var LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+
+  /* ---------- rendu des choix ---------- */
+  $$('[data-choice]').forEach(function (box) {
+    var key = box.getAttribute('data-choice');
+    CHOICES[key].forEach(function (o, i) {
+      box.append(el('label', { 'class': 'opt' },
+        el('input', { type: 'radio', name: key, id: key + '-' + i, value: o[0] }),
+        el('span', { 'class': 'opt-body' },
+          el('span', { 'class': 'opt-text', text: o[1] }),
+          o[2] && el('span', { 'class': 'opt-hint', text: o[2] }))));
+    });
+  });
+
+  /* ---------- langues ---------- */
+  var langN = 0;
+  function addLang(def) {
+    var n = ++langN;
+    var lang = el('select', { 'class': 'ctl', id: 'lang-' + n, 'aria-label': 'Langue' },
+      el('option', { value: '', text: 'Choisir une langue' }),
+      LANGS.map(function (l) { return el('option', { value: l, text: l }); }),
+      el('option', { value: '__autre', text: 'Autre…' }));
+    var niv = el('select', { 'class': 'ctl lvl', id: 'niv-' + n, 'aria-label': 'Niveau' },
+      el('option', { value: '', text: 'Niveau' }),
+      LEVELS.map(function (l) { return el('option', { value: l, text: l }); }));
+    var other = el('input', { 'class': 'ctl other', id: 'autre-' + n, type: 'text', maxlength: '40', placeholder: 'Quelle langue ?', 'aria-label': 'Nom de la langue', hidden: true });
+    var row;
+    var del = el('button', { type: 'button', 'class': 'icon-btn', 'aria-label': 'Retirer cette langue', onclick: function () { row.remove(); update(); } }, '×');
+    row = el('div', { 'class': 'lang-row' }, lang, niv, del, other);
+    lang.addEventListener('change', function () {
+      other.hidden = lang.value !== '__autre';
+      if (!other.hidden) other.focus();
+    });
+    if (def) lang.value = def;
+    $('#langs').append(row);
+  }
+  addLang('Français');
+  $('#add-lang').addEventListener('click', function () {
+    addLang('');
+    var rows = $$('.lang-row');
+    $('select', rows[rows.length - 1]).focus();
+    update();
+  });
+
+  /* ---------- taille / poids / IMC ---------- */
+  function num(s) {
+    var m = String(s || '').replace(',', '.').match(/\d+(\.\d+)?/);
+    return m ? parseFloat(m[0]) : NaN;
+  }
+  function parseHeight(s) {
+    var n = num(s);
+    if (!isFinite(n)) return null;
+    if (n < 3) n = n * 100;
+    return n >= 100 && n <= 250 ? Math.round(n * 10) / 10 : null;
+  }
+  function parseWeight(s) {
+    var n = num(s);
+    return isFinite(n) && n >= 25 && n <= 400 ? Math.round(n * 10) / 10 : null;
+  }
+  function readMeasures() {
+    var h = parseHeight($('#taille').value);
+    var w = parseWeight($('#poids').value);
+    var out = {};
+    if (h) out.taille_cm = h;
+    if (w) out.poids_kg = w;
+    if (h && w) out.imc = Math.round(w / Math.pow(h / 100, 2) * 10) / 10;
+    return out;
+  }
+  function category(imc) {
+    if (imc < 18.5) return ['Maigreur', 'low'];
+    if (imc < 25) return ['Corpulence normale', 'ok'];
+    if (imc < 30) return ['Surpoids', 'over'];
+    return ['Obésité', 'obese'];
+  }
+  function updateBmi() {
+    var m = readMeasures();
+    var tRaw = $('#taille').value.trim();
+    var pRaw = $('#poids').value.trim();
+    var res = $('#bmi-res');
+    var empty = $('#bmi-empty');
+    if (m.imc) {
+      var c = category(m.imc);
+      $('#bmi-val').textContent = fr(m.imc, fr1);
+      var chip = $('#bmi-cat');
+      chip.textContent = c[0];
+      chip.setAttribute('data-tone', c[1]);
+      $('#bmi-calc').textContent = 'IMC = ' + fr(m.poids_kg) + ' kg ÷ (' + fr(m.taille_cm / 100, { maximumFractionDigits: 3 }) + ' m)² = ' + fr(m.imc, fr1);
+      var pct = Math.max(0, Math.min(1, (m.imc - 15) / 25)) * 100;
+      $('#gauge-mark').style.left = pct + '%';
+      res.hidden = false;
+      empty.hidden = true;
+    } else {
+      res.hidden = true;
+      empty.hidden = false;
+      empty.textContent = ((tRaw && !m.taille_cm) || (pRaw && !m.poids_kg))
+        ? 'Je n’arrive pas à lire la taille ou le poids. Taille en cm (168), poids en kg (58).'
+        : 'Indique ta taille et ton poids : l’IMC se calcule tout seul.';
+    }
+  }
+
+  /* ---------- collecte, formatage ---------- */
+  function parseAge(s) {
+    var m = /^\s*(\d{1,3})\s*(ans?)?\s*$/i.exec(s || '');
+    var n = m ? parseInt(m[1], 10) : 0;
+    return n >= 1 && n <= 120 ? n : null;
+  }
+  function checked(name) {
+    var c = $('input[name="' + name + '"]:checked');
+    return c ? c.value : null;
+  }
+  function collect() {
+    var a = {};
+    var prenom = $('#prenom').value.trim();
+    if (prenom) a.prenom = prenom;
+    var age = parseAge($('#age').value);
+    if (age) a.age = age;
+    var m = readMeasures();
+    if (Object.keys(m).length) a.mensurations = m;
+    var langues = $$('.lang-row').map(function (r) {
+      var s = $('select', r).value;
+      var lvl = $('.lvl', r).value;
+      var name = s === '__autre' ? $('.other', r).value.trim() : s;
+      if (!name || (!lvl && name === 'Français')) return null;
+      return { langue: name, niveau: lvl || null };
+    }).filter(Boolean);
+    if (langues.length) a.langues = langues;
+    var tat = checked('tatouages');
+    if (tat === 'oui') {
+      var n = parseInt($('#tat-count').value, 10);
+      a.tatouages = { oui: true, nombre: isFinite(n) && n >= 0 ? n : null };
+    } else if (tat === 'non') {
+      a.tatouages = { oui: false };
+    }
+    CHOICE_KEYS.forEach(function (k) {
+      var v = checked(k);
+      if (v) a[k] = v;
+    });
+    var h = $('#hobbies').value.trim();
+    if (h) a.hobbies = h;
+    return a;
+  }
+  function fmt(k, v) {
+    if (v == null || v === '') return null;
+    if (k === 'mensurations') {
+      var p = [];
+      if (v.taille_cm) p.push(fr(v.taille_cm / 100, { maximumFractionDigits: 3 }) + ' m');
+      if (v.poids_kg) p.push(fr(v.poids_kg) + ' kg');
+      if (v.imc) p.push('IMC ' + fr(v.imc, fr1) + ' (' + category(v.imc)[0].toLowerCase() + ')');
+      return p.join(' · ') || null;
+    }
+    if (k === 'langues') {
+      return (Array.isArray(v) ? v : []).map(function (l) {
+        return l.niveau ? l.langue + ' (' + l.niveau + ')' : l.langue;
+      }).join('\n') || null;
+    }
+    if (k === 'tatouages') return v.oui ? (v.nombre != null ? 'Oui, ' + v.nombre : 'Oui') : 'Non';
+    if (CHOICES[k]) {
+      var opt = CHOICES[k].filter(function (o) { return o[0] === v; })[0];
+      return opt ? opt[1] : String(v);
+    }
+    return String(v);
+  }
+  function describe(a) {
+    return KEYS.map(function (k) { return [k, TITLES[k], fmt(k, a[k])]; });
+  }
+  function summaryText(a) {
+    return describe(a).filter(function (d) { return d[2]; })
+      .map(function (d) { return d[1] + ' : ' + d[2].replace(/\n/g, ', '); }).join('\n');
+  }
+
+  /* ---------- mise à jour de l'interface ---------- */
+  var steps = $$('#form > section.q');
+  var step = 0;
+  var HINTS = [
+    'Indique ton prénom pour continuer.',
+    'Indique ton âge en chiffres pour continuer.',
+    'Indique ta taille et ton poids pour continuer.',
+    'Choisis une langue et un niveau sur chaque ligne pour continuer.',
+    'Choisis une réponse (et combien, si oui) pour continuer.'
+  ];
+  var HINT_DEFAULT = 'Réponds à la question pour continuer.';
+  function choiceDone(k) { return function (a) { return !!a[k]; }; }
+  function langsComplete() {
+    var rows = $$('.lang-row');
+    return rows.length > 0 && rows.every(function (r) {
+      var s = $('select', r).value;
+      var name = s === '__autre' ? $('.other', r).value.trim() : s;
+      return !!name && !!$('.lvl', r).value;
+    });
+  }
+  var VALID = [
+    function (a) { return !!a.prenom; },
+    function (a) { return !!a.age; },
+    function (a) { return !!(a.mensurations && a.mensurations.imc); },
+    langsComplete,
+    function (a) { var t = a.tatouages; return !!t && (!t.oui || (t.nombre != null && t.nombre >= 1)); },
+    choiceDone('bodycount'), choiceDone('mariage'), choiceDone('politique'),
+    function (a) { return !!a.hobbies; },
+    choiceDone('tabac'), choiceDone('alcool'), choiceDone('vegan')
+  ];
+  $$('.q-kicker').forEach(function (k, i) { k.textContent = 'Question ' + (i + 1) + ' sur ' + steps.length; });
+  steps.forEach(function (s, j) { s.hidden = j !== 0; });
+
+  function update() {
+    updateBmi();
+    $('#tat-wrap').hidden = checked('tatouages') !== 'oui';
+    var ok = VALID[step](collect());
+    var next = $('#next');
+    next.disabled = !ok;
+    next.textContent = step === steps.length - 1 ? 'Envoyer mes réponses' : 'Suivant';
+    $('#back').hidden = step === 0;
+    $('#nav-hint').textContent = ok ? '' : (HINTS[step] || HINT_DEFAULT);
+    $('#steps-fill').style.width = ((step + 1) / steps.length * 100) + '%';
+  }
+  function goTo(i) {
+    step = Math.max(0, Math.min(steps.length - 1, i));
+    steps.forEach(function (s, j) { s.hidden = j !== step; });
+    update();
+    var h = $('.q-title', steps[step]);
+    h.setAttribute('tabindex', '-1');
+    h.focus({ preventScroll: true });
+    $('.intro').scrollIntoView();
+  }
+  var form = $('#form');
+  form.addEventListener('input', update);
+  form.addEventListener('change', update);
+  form.addEventListener('submit', function (e) { e.preventDefault(); });
+  form.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+    e.preventDefault();
+    if (!$('#next').disabled) $('#next').click();
+  });
+  $('#back').addEventListener('click', function () { goTo(step - 1); });
+  $('#next').addEventListener('click', function () {
+    if (step === steps.length - 1) send(); else goTo(step + 1);
+  });
+  update();
+
+  /* ---------- envoi ---------- */
+  function showForm() {
+    $('#done').hidden = true;
+    form.hidden = false;
+    goTo(0);
+  }
+  function showDone(saved, text) {
+    var box = $('#done');
+    box.replaceChildren();
+    if (saved) {
+      box.append(
+        el('h2', { 'class': 'q-title', text: 'Merci, c’est envoyé.' }),
+        el('p', { 'class': 'muted', text: 'Tes réponses sont bien parties. Tu peux fermer cette page.' })
+      );
+    } else {
+      var ta = el('textarea', { 'class': 'ctl', id: 'fallback-text', readonly: true, 'aria-label': 'Mes réponses' });
+      ta.value = text || 'Aucune réponse remplie.';
+      var copy = el('button', { type: 'button', 'class': 'btn' }, 'Copier mes réponses');
+      copy.addEventListener('click', function () {
+        var done = function () { copy.textContent = 'Copié'; };
+        var fail = function () { ta.focus(); ta.select(); copy.textContent = 'Sélectionné : copie avec Ctrl+C'; };
+        try { navigator.clipboard.writeText(ta.value).then(done, fail); } catch (e) { fail(); }
+      });
+      box.append(
+        el('h2', { 'class': 'q-title', text: 'Envoi impossible' }),
+        el('p', { 'class': 'muted', text: 'Tes réponses n’ont pas pu être envoyées automatiquement. Copie-les ci-dessous et envoie-les à la personne qui t’a partagé le questionnaire.' }),
+        ta,
+        el('div', { 'class': 'done-actions' }, copy, el('button', { type: 'button', 'class': 'btn-ghost', onclick: showForm }, 'Retour au questionnaire'))
+      );
+    }
+    form.hidden = true;
+    box.hidden = false;
+    $('.intro').scrollIntoView();
+  }
+  function emailFields(a) {
+    var out = {};
+    describe(a).forEach(function (d) { out[d[1]] = d[2] ? d[2].replace(/\n/g, ', ') : '—'; });
+    return out;
+  }
+  var sending = false;
+  async function send() {
+    var answers = collect();
+    if (sending || !VALID.every(function (ok) { return ok(answers); })) return;
+    sending = true;
+    var btn = $('#next');
+    btn.disabled = true;
+    btn.textContent = 'Envoi…';
+    var saved = false;
+    try {
+      var payload = emailFields(answers);
+      payload._subject = 'Questionnaire : réponse de ' + answers.prenom;
+      payload._template = 'table';
+      payload._captcha = 'false';
+      var res = await fetch(FORM_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      var data = await res.json().catch(function () { return {}; });
+      saved = res.ok && String(data.success) !== 'false';
+    } catch (err) { saved = false; }
+    sending = false;
+    update();
+    showDone(saved, summaryText(answers));
+  }
+
+})();
+</script>
+</body>
+</html>
