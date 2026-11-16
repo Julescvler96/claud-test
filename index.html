@@ -714,8 +714,8 @@ textarea.ctl { resize: vertical; min-height: 112px; }
       payload._captcha = 'false';
       var res = await fetch(FORM_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(payload)
+        headers: { 'Accept': 'application/json' },
+        body: new URLSearchParams(payload)
       });
       var data = await res.json().catch(function () { return {}; });
       saved = res.ok && String(data.success) !== 'false';
