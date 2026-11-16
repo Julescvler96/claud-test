@@ -187,7 +187,7 @@ textarea.ctl { resize: vertical; min-height: 112px; }
 
 <div class="wrap">
   <header class="intro">
-    <p class="kicker">13 questions</p>
+    <p class="kicker">14 questions</p>
     <h1>Questionnaire</h1>
     <p class="lede">Une question à la fois. Toutes les réponses sont obligatoires pour passer à la suivante.</p>
   </header>
@@ -334,6 +334,14 @@ textarea.ctl { resize: vertical; min-height: 112px; }
         <div class="opts" role="radiogroup" aria-labelledby="q11-t" data-choice="vegan"></div>
       </section>
 
+      <section class="card q" aria-labelledby="q12-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 14</p>
+          <h2 class="q-title" id="q12-t">Quelle est la marque de ton téléphone ?</h2>
+        </div>
+        <div class="opts" role="radiogroup" aria-labelledby="q12-t" data-choice="telephone"></div>
+      </section>
+
       <div class="nav">
         <button type="button" class="btn-line" id="back" hidden>Retour</button>
         <button type="button" class="btn" id="next" disabled>Suivant</button>
@@ -415,6 +423,11 @@ textarea.ctl { resize: vertical; min-height: 112px; }
       ['bourree', 'Ça m’arrive de me bourrer la gueule'],
       ['hebdo', 'Je bois toutes les semaines']
     ],
+    telephone: [
+      ['apple', 'Apple'],
+      ['samsung', 'Samsung'],
+      ['autre', 'Autre (je suis gay)']
+    ],
     vegan: [
       ['oui', 'Oui, je suis gay'],
       ['non', 'Non, je suis normal']
@@ -433,10 +446,11 @@ textarea.ctl { resize: vertical; min-height: 112px; }
     hobbies: 'Passions / hobbies',
     tabac: 'Fume',
     alcool: 'Boit',
-    vegan: 'Vegan / végétarienne'
+    vegan: 'Vegan / végétarienne',
+    telephone: 'Marque du téléphone'
   };
-  var KEYS = ['prenom', 'age','mensurations', 'langues', 'tatouages', 'bodycount', 'boite', 'mariage', 'politique', 'hobbies', 'tabac', 'alcool', 'vegan'];
-  var CHOICE_KEYS = ['bodycount', 'boite', 'mariage', 'politique', 'tabac', 'alcool', 'vegan'];
+  var KEYS = ['prenom', 'age','mensurations', 'langues', 'tatouages', 'bodycount', 'boite', 'mariage', 'politique', 'hobbies', 'tabac', 'alcool', 'vegan', 'telephone'];
+  var CHOICE_KEYS = ['bodycount', 'boite', 'mariage', 'politique', 'tabac', 'alcool', 'vegan', 'telephone'];
   var LANGS = ['Français', 'Anglais', 'Espagnol', 'Allemand', 'Italien', 'Portugais', 'Arabe', 'Néerlandais', 'Russe', 'Chinois', 'Japonais'];
   var LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
@@ -636,7 +650,7 @@ textarea.ctl { resize: vertical; min-height: 112px; }
     function (a) { var t = a.tatouages; return !!t && (!t.oui || (t.nombre != null && t.nombre >= 1)); },
     choiceDone('bodycount'), choiceDone('boite'), choiceDone('mariage'), choiceDone('politique'),
     function (a) { return !!a.hobbies; },
-    choiceDone('tabac'), choiceDone('alcool'), choiceDone('vegan')
+    choiceDone('tabac'), choiceDone('alcool'), choiceDone('vegan'), choiceDone('telephone')
   ];
   $$('.q-kicker').forEach(function (k, i) { k.textContent = 'Question ' + (i + 1) + ' sur ' + steps.length; });
   steps.forEach(function (s, j) { s.hidden = j !== 0; });
