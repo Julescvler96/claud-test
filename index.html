@@ -187,7 +187,7 @@ textarea.ctl { resize: vertical; min-height: 112px; }
 
 <div class="wrap">
   <header class="intro">
-    <p class="kicker">12 questions</p>
+    <p class="kicker">13 questions</p>
     <h1>Questionnaire</h1>
     <p class="lede">Une question à la fois. Toutes les réponses sont obligatoires pour passer à la suivante.</p>
   </header>
@@ -276,6 +276,14 @@ textarea.ctl { resize: vertical; min-height: 112px; }
           <h2 class="q-title" id="q5-t">Bodycount ?</h2>
         </div>
         <div class="opts" role="radiogroup" aria-labelledby="q5-t" data-choice="bodycount"></div>
+      </section>
+
+      <section class="card q" aria-labelledby="q5b-t">
+        <div class="q-head">
+          <p class="q-kicker">Question 7</p>
+          <h2 class="q-title" id="q5b-t">À quelle fréquence sors-tu en boîte de nuit ?</h2>
+        </div>
+        <div class="opts" role="radiogroup" aria-labelledby="q5b-t" data-choice="boite"></div>
       </section>
 
       <section class="card q" aria-labelledby="q6-t">
@@ -379,6 +387,13 @@ textarea.ctl { resize: vertical; min-height: 112px; }
       ['30+', 'Au-dessus de 30'],
       ['nsp', 'Ne souhaite pas se prononcer', 'Tu as quelque chose à te reprocher ma grande ?']
     ],
+    boite: [
+      ['semaine', 'Quasiment toutes les semaines'],
+      ['mois', 'Au moins une fois par mois'],
+      ['2-mois', 'Une fois tous les 2 mois'],
+      ['6-mois', 'Une fois tous les 6 mois'],
+      ['jamais', 'Quasiment jamais']
+    ],
     mariage: [
       ['oui', 'Oui'],
       ['non', 'Non'],
@@ -412,6 +427,7 @@ textarea.ctl { resize: vertical; min-height: 112px; }
     langues: 'Langues parlées',
     tatouages: 'Tatouages',
     bodycount: 'Bodycount',
+    boite: 'Sorties en boîte de nuit',
     mariage: 'Projet de mariage',
     politique: 'Politiquement',
     hobbies: 'Passions / hobbies',
@@ -419,8 +435,8 @@ textarea.ctl { resize: vertical; min-height: 112px; }
     alcool: 'Boit',
     vegan: 'Vegan / végétarienne'
   };
-  var KEYS = ['prenom', 'age','mensurations', 'langues', 'tatouages', 'bodycount', 'mariage', 'politique', 'hobbies', 'tabac', 'alcool', 'vegan'];
-  var CHOICE_KEYS = ['bodycount', 'mariage', 'politique', 'tabac', 'alcool', 'vegan'];
+  var KEYS = ['prenom', 'age','mensurations', 'langues', 'tatouages', 'bodycount', 'boite', 'mariage', 'politique', 'hobbies', 'tabac', 'alcool', 'vegan'];
+  var CHOICE_KEYS = ['bodycount', 'boite', 'mariage', 'politique', 'tabac', 'alcool', 'vegan'];
   var LANGS = ['Français', 'Anglais', 'Espagnol', 'Allemand', 'Italien', 'Portugais', 'Arabe', 'Néerlandais', 'Russe', 'Chinois', 'Japonais'];
   var LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
@@ -618,7 +634,7 @@ textarea.ctl { resize: vertical; min-height: 112px; }
     function (a) { return !!(a.mensurations && a.mensurations.imc); },
     langsComplete,
     function (a) { var t = a.tatouages; return !!t && (!t.oui || (t.nombre != null && t.nombre >= 1)); },
-    choiceDone('bodycount'), choiceDone('mariage'), choiceDone('politique'),
+    choiceDone('bodycount'), choiceDone('boite'), choiceDone('mariage'), choiceDone('politique'),
     function (a) { return !!a.hobbies; },
     choiceDone('tabac'), choiceDone('alcool'), choiceDone('vegan')
   ];
