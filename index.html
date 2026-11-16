@@ -342,7 +342,7 @@ textarea.ctl { resize: vertical; min-height: 112px; }
 (function () {
   'use strict';
 
-  var FORM_ENDPOINT = 'https://formsubmit.co/ajax/jules.cuvelier96@gmail.com';
+  var FORM_ENDPOINT = 'https://formsubmit.co/ajax/da5488ea243327f48e3177ac2638a357';
 
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
@@ -665,7 +665,7 @@ textarea.ctl { resize: vertical; min-height: 112px; }
     form.hidden = false;
     goTo(0);
   }
-  function showDone(saved, text) {
+  function showDone(saved, text, detail) {
     var box = $('#done');
     box.replaceChildren();
     if (saved) {
@@ -685,6 +685,7 @@ textarea.ctl { resize: vertical; min-height: 112px; }
       box.append(
         el('h2', { 'class': 'q-title', text: 'Envoi impossible' }),
         el('p', { 'class': 'muted', text: 'Tes réponses n’ont pas pu être envoyées automatiquement. Copie-les ci-dessous et envoie-les à la personne qui t’a partagé le questionnaire.' }),
+        detail && el('p', { 'class': 'levels-hint', text: 'Détail technique : ' + detail }),
         ta,
         el('div', { 'class': 'done-actions' }, copy, el('button', { type: 'button', 'class': 'btn-ghost', onclick: showForm }, 'Retour au questionnaire'))
       );
@@ -707,6 +708,7 @@ textarea.ctl { resize: vertical; min-height: 112px; }
     btn.disabled = true;
     btn.textContent = 'Envoi…';
     var saved = false;
+    var detail = '';
     var ctrl = new AbortController();
     var slow = setTimeout(function () {
       $('#nav-hint').textContent = 'Ça prend un peu plus de temps que d’habitude, ne ferme pas la page.';
@@ -725,12 +727,16 @@ textarea.ctl { resize: vertical; min-height: 112px; }
       });
       var data = await res.json().catch(function () { return {}; });
       saved = res.ok && String(data.success) !== 'false';
-    } catch (err) { saved = false; }
+      if (!saved) detail = (data && data.message) || 'Erreur ' + res.status;
+    } catch (err) {
+      saved = false;
+      detail = err && err.name === 'AbortError' ? 'Pas de réponse au bout de 2 minutes.' : 'Connexion impossible.';
+    }
     clearTimeout(slow);
     clearTimeout(giveUp);
     sending = false;
     update();
-    showDone(saved, summaryText(answers));
+    showDone(saved, summaryText(answers), detail);
   }
 
 })();
