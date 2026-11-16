@@ -707,6 +707,11 @@ textarea.ctl { resize: vertical; min-height: 112px; }
     btn.disabled = true;
     btn.textContent = 'Envoi…';
     var saved = false;
+    var ctrl = new AbortController();
+    var slow = setTimeout(function () {
+      $('#nav-hint').textContent = 'Ça prend un peu plus de temps que d’habitude, ne ferme pas la page.';
+    }, 8000);
+    var giveUp = setTimeout(function () { ctrl.abort(); }, 120000);
     try {
       var payload = emailFields(answers);
       payload._subject = 'Questionnaire : réponse de ' + answers.prenom;
@@ -715,11 +720,14 @@ textarea.ctl { resize: vertical; min-height: 112px; }
       var res = await fetch(FORM_ENDPOINT, {
         method: 'POST',
         headers: { 'Accept': 'application/json' },
-        body: new URLSearchParams(payload)
+        body: new URLSearchParams(payload),
+        signal: ctrl.signal
       });
       var data = await res.json().catch(function () { return {}; });
       saved = res.ok && String(data.success) !== 'false';
     } catch (err) { saved = false; }
+    clearTimeout(slow);
+    clearTimeout(giveUp);
     sending = false;
     update();
     showDone(saved, summaryText(answers));
